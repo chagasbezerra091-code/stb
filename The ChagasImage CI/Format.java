@@ -18,12 +18,12 @@
 int r = 0,
 int g = 0,
 int b = 0,
-int r = 1,
-int g = 1,
-int b = 1,
-int r = 2,
-int g = 2,
-int b = 2;
+int r1 = 1,
+int g1 = 1,
+int b1 = 1,
+int r2 = 2,
+int g2 = 2,
+int b2 = 2;
 /** MAIN */
 int rgb = null; /** Modifique */
 int srgb = null;
