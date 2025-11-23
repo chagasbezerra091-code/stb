@@ -2035,3 +2035,82 @@ override fun onDraw(canvas: Canvas) {
     super.onDraw(canvas)
     canvas.drawCircle(100f, 100f, 50f, paint)
 }
+class MeuGLSurfaceView(context: Context) : GLSurfaceView(context) {
+
+    private val renderer: MeuRenderer
+
+    init {
+        // Configura para usar OpenGL ES 2.0
+        setEGLContextClientVersion(2)
+
+        renderer = MeuRenderer()
+        setRenderer(renderer)
+
+        // Redesenha a tela apenas quando necessário
+        renderMode = RENDERMODE_WHEN_DIRTY
+    }
+}
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val glView = MeuGLSurfaceView(this)
+        setContentView(glView)
+    }
+}
+class MeuRenderer : GLSurfaceView.Renderer {
+
+    override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
+        // Fundo preto
+        GLES20.glClearColor(0f, 0f, 0f, 1f)
+    }
+
+    override fun onDrawFrame(gl: GL10?) {
+        // Limpa a tela
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
+
+        // Aqui desenhamos os objetos 3D
+        // Por enquanto, só vamos limpar a tela
+    }
+
+    override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
+        GLES20.glViewport(0, 0, width, height)
+    }
+}
+val vertexBuffer: FloatBuffer = ByteBuffer
+    .allocateDirect(triangleCoords.size * 4)
+    .order(ByteOrder.nativeOrder())
+    .asFloatBuffer()
+    .apply {
+        put(triangleCoords)
+        position(0)
+    }
+ val vertexShaderCode = """
+    attribute vec4 vPosition;
+    void main() {
+        gl_Position = vPosition;
+    }
+""".trimIndent()
+
+val fragmentShaderCode = """
+    precision mediump float;
+    uniform vec4 vColor;
+    void main() {
+        gl_FragColor = vColor;
+    }
+""".trimIndent()
+
+fun loadShader(type: Int, shaderCode: String): Int {
+    val shader = GLES20.glCreateShader(type)
+    GLES20.glShaderSource(shader, shaderCode)
+    GLES20.glCompileShader(shader)
+    return shader
+}
+val vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode)
+val fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode)
+
+val program = GLES20.glCreateProgram().also {
+    GLES20.glAttachShader(it, vertexShader)
+    GLES20.glAttachShader(it, fragmentShader)
+    GLES20.glLinkProgram(it)
+}
